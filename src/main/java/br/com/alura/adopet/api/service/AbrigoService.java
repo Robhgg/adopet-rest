@@ -4,9 +4,8 @@ import br.com.alura.adopet.api.exception.ValidacaoException;
 import br.com.alura.adopet.api.model.Abrigo;
 import br.com.alura.adopet.api.model.Pet;
 import br.com.alura.adopet.api.repository.AbrigoRepository;
-import jakarta.persistence.EntityNotFoundException;
+import br.com.alura.adopet.api.util.ValidadorUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -40,14 +39,8 @@ public class AbrigoService {
      * @return Uma lista de Pets com base na entrada fornecida.
      */
     public List<Pet> listarPets(String idOuNome) {
-        // Verifica se a entrada contém apenas números usando uma expressão regular.
-        if(idOuNome.matches("^[0-9]+$")) {
-            Long id = Long.parseLong(idOuNome);
-            return repository.getReferenceById(id).getPets();
-        }
-
-        // Se a entrada não é um número, assume-se que é um nome.
-        return repository.findByNome(idOuNome).getPets();
+        return ValidadorUtil.isNumeric(idOuNome)
+                ? repository.getReferenceById(Long.parseLong(idOuNome)).getPets()
+                : repository.findByNome(idOuNome).getPets();
     }
-
 }
