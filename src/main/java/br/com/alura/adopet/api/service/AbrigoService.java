@@ -5,9 +5,12 @@ import br.com.alura.adopet.api.model.Abrigo;
 import br.com.alura.adopet.api.model.Pet;
 import br.com.alura.adopet.api.repository.AbrigoRepository;
 import br.com.alura.adopet.api.util.ValidadorUtil;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -39,8 +42,29 @@ public class AbrigoService {
      * @return Uma lista de Pets com base na entrada fornecida.
      */
     public List<Pet> listarPets(String idOuNome) {
-        return ValidadorUtil.isNumeric(idOuNome)
-                ? repository.getReferenceById(Long.parseLong(idOuNome)).getPets()
-                : repository.findByNome(idOuNome).getPets();
+        try {
+            return ValidadorUtil.isNumeric(idOuNome)
+                    ? repository.getReferenceById(Long.parseLong(idOuNome)).getPets()
+                    : repository.findByNome(idOuNome).getPets();
+
+        } catch (EntityNotFoundException e) {
+            return Collections.emptyList();
+        }
+    }
+
+    public void cadastrarPet(String idOuNome, Pet pet) {
+        try {
+            Abrigo abrigo = ValidadorUtil.isNumeric(idOuNome)
+                    ? repository.getReferenceById(Long.parseLong(idOuNome))
+                    : repository.findByNome(idOuNome);
+
+            pet.setAbrigo(abrigo);
+            pet.setAdotado(false);
+            abrigo.getPets().add(pet);
+            repository.save(abrigo);
+
+        } catch(EntityNotFoundException e) {
+            throw new ValidacaoException("Nao foi possivel cadastrar o pet no abrigo.");
+        }
     }
 }
