@@ -1,11 +1,14 @@
 package br.com.alura.adopet.api.model;
 
+import br.com.alura.adopet.api.dto.DadosCadastroTutorDto;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -15,7 +18,6 @@ public class Tutor {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
 
     @NotBlank
@@ -35,6 +37,12 @@ public class Tutor {
     @OneToMany(mappedBy = "tutor", fetch = FetchType.EAGER)
     @JsonManagedReference("tutor_adocoes")
     private List<Adocao> adocoes;
+
+    public Tutor(DadosCadastroTutorDto dto) {
+        this.nome = dto.nome();
+        this.email = dto.email();
+        this.telefone = dto.telefone();
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -82,7 +90,8 @@ public class Tutor {
     }
 
     public List<Adocao> getAdocoes() {
-        return adocoes;
+        return adocoes == null ? Collections.EMPTY_LIST
+                : adocoes;
     }
 
     public void setAdocoes(List<Adocao> adocoes) {
